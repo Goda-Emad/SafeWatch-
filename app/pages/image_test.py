@@ -4,6 +4,7 @@ import streamlit as st
 from PIL import Image
 import sys
 from pathlib import Path
+from datetime import datetime
 
 # ═══════════════════════════════════════
 # Path Setup
@@ -12,7 +13,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from src.predict import predict_image
 from src.preprocess import preprocess_image, validate_image
-from src.alert import check_alert, log_alert, get_alert_message
+from src.alert import check_alert, log_alert
 from src.email_sender import send_alert_email
 
 # ═══════════════════════════════════════
@@ -51,33 +52,26 @@ if uploaded_file:
 
     with col1:
         st.markdown("#### 📷 الصورة المرفوعة")
-        st.image(image, use_container_width=True)
+        st.image(image, width=500)
 
     with col2:
         st.markdown("#### 🔍 نتيجة التحليل")
 
         with st.spinner("جاري التحليل..."):
-            # Preprocess + Predict
             processed = preprocess_image(image)
             label, confidence, all_scores = predict_image(processed)
 
-        # ── النتيجة الرئيسية ──
-        is_alert = check_alert(
-            label,
-            confidence,
-            st.session_state.get("threshold", 0.75)
-        )
+        threshold = st.session_state.get("threshold", 0.75)
+        is_alert  = check_alert(label, confidence, threshold)
 
         if is_alert:
-            st.error(f"🚨 تم اكتشاف سلوك مشبوه!")
+            st.error("🚨 تم اكتشاف سلوك مشبوه!")
             st.metric("السلوك المكتشف", label.upper())
             st.metric("نسبة الثقة", f"{confidence:.2%}")
 
-            # تشغيل صوت التنبيه
             audio_path = Path("app/assets/alert_sound.mp3")
             if audio_path.exists():
                 st.audio(str(audio_path), autoplay=True)
-
         else:
             st.success("✅ لا يوجد سلوك مشبوه")
             st.metric("السلوك المكتشف", label.upper())
@@ -85,14 +79,14 @@ if uploaded_file:
 
         st.divider()
 
-        # ── كل الـ Scores ──
         st.markdown("#### 📊 نسب كل السلوكيات")
         for lbl, score in sorted(
             all_scores.items(),
             key=lambda x: x[1],
             reverse=True
         ):
-            st.progress(score, text=f"{lbl}: {score:.2%}")
+            color = "🔴" if lbl == "fighting" else "🟢"
+            st.progress(score, text=f"{color} {lbl}: {score:.2%}")
 
     # ═══════════════════════════════════════
     # Alert Actions
@@ -106,12 +100,15 @@ if uploaded_file:
         with col3:
             if st.button("📧 إرسال تنبيه بالإيميل", type="primary"):
                 with st.spinner("جاري الإرسال..."):
-                    # حفظ الصورة مؤقتاً
-                    screenshot_path = f"alerts/screenshots/{label}_{confidence:.0%}.jpg"
-                    Path("alerts/screenshots").mkdir(parents=True, exist_ok=True)
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    screenshot_path = (
+                        f"alerts/screenshots/{timestamp}_{label}.jpg"
+                    )
+                    Path("alerts/screenshots").mkdir(
+                        parents=True, exist_ok=True
+                    )
                     image.save(screenshot_path)
 
-                    # إرسال الإيميل
                     success = send_alert_email(
                         label=label,
                         confidence=confidence,
@@ -120,20 +117,21 @@ if uploaded_file:
 
                 if success:
                     st.success("✅ تم إرسال التنبيه بنجاح!")
-                    st.session_state["total_emails"] = \
+                    st.session_state["total_emails"] = (
                         st.session_state.get("total_emails", 0) + 1
+                    )
                 else:
-                    st.error("❌ فشل إرسال الإيميل — تحقق من الإعدادات")
+                    st.error("❌ فشل إرسال الإيميل")
 
         with col4:
             if st.button("📝 تسجيل الحادثة"):
                 log_alert(label, confidence, screenshot_path)
-                st.success("✅ تم تسجيل الحادثة في السجل")
+                st.success("✅ تم تسجيل الحادثة")
 
-        # تحديث الإحصائيات
-        st.session_state["total_alerts"] = \
+        st.session_state["total_alerts"] = (
             st.session_state.get("total_alerts", 0) + 1
+        )
 
-    # تحديث عداد الصور
-    st.session_state["total_predictions"] = \
+    st.session_state["total_predictions"] = (
         st.session_state.get("total_predictions", 0) + 1
+    )
