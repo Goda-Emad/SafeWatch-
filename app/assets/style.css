@@ -1,242 +1,48 @@
-/* SafeWatch - app/assets/style.css */
+/* ActionLens - app/assets/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
-/* ═══════════════════════════════════════
-   Font Import
-═══════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+/* ── Global font ── */
+* { font-family: 'Cairo', 'Segoe UI', sans-serif; }
 
-/* ═══════════════════════════════════════
-   CSS Variables — Light Mode
-═══════════════════════════════════════ */
-:root {
-    --navy:      #1a2744;
-    --navy-mid:  #243358;
-    --gold:      #f0a500;
-    --gold-light:#ffc93c;
-    --white:     #ffffff;
-    --bg:        #f0f4f8;
-    --card-bg:   #ffffff;
-    --text:      #1a2744;
-    --text-soft: #5a6a85;
-    --border:    #dce3ed;
-    --success:   #1a7a4a;
-    --success-bg:#edfaf3;
-    --danger:    #c0392b;
-    --danger-bg: #fff0f0;
-}
+/* ── Headers (outside sidebar) ── */
+h1, h2, h3 { font-weight: 700; }
 
-/* ═══════════════════════════════════════
-   CSS Variables — Dark Mode
-═══════════════════════════════════════ */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --navy:      #0d1b2a;
-        --navy-mid:  #1a2744;
-        --gold:      #f0a500;
-        --gold-light:#ffc93c;
-        --white:     #ffffff;
-        --bg:        #0d1b2a;
-        --card-bg:   #1a2744;
-        --text:      #e8edf5;
-        --text-soft: #8a9bb5;
-        --border:    #2a3a55;
-        --success:   #2ecc71;
-        --success-bg:#0d2a1a;
-        --danger:    #e74c3c;
-        --danger-bg: #2a0d0d;
-    }
-}
-
-/* ═══════════════════════════════════════
-   General
-═══════════════════════════════════════ */
-* {
-    font-family: 'Cairo', 'Segoe UI', sans-serif;
-}
-
-.stApp {
-    background-color: var(--bg);
-}
-
-/* ═══════════════════════════════════════
-   Headers
-═══════════════════════════════════════ */
-h1 {
-    color: var(--navy) !important;
-    font-weight: 700;
-    font-size: 2rem;
-    border-bottom: 3px solid var(--gold);
-    padding-bottom: 8px;
-    display: inline-block;
-}
-
-h2, h3 {
-    color: var(--text) !important;
-    font-weight: 600;
-}
-
-/* ═══════════════════════════════════════
-   Sidebar
-═══════════════════════════════════════ */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%);
-    border-right: 3px solid var(--gold);
-}
-
-[data-testid="stSidebar"] * {
-    color: #e8edf5 !important;
-}
-
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: var(--gold) !important;
-    border-bottom: none;
-}
-
-[data-testid="stSidebar"] hr {
-    border-color: #2a3a55 !important;
-}
-
-/* ═══════════════════════════════════════
-   Metrics
-═══════════════════════════════════════ */
-[data-testid="stMetric"] {
-    background: var(--card-bg);
-    border-radius: 14px;
-    padding: 18px;
-    border: 1px solid var(--border);
-    border-top: 4px solid var(--gold);
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-
-[data-testid="stMetricLabel"] {
-    font-size: 0.85rem;
-    color: var(--text-soft) !important;
-    font-weight: 500;
-}
-
-[data-testid="stMetricValue"] {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--navy) !important;
-}
-
-/* ═══════════════════════════════════════
-   Alert Banner
-═══════════════════════════════════════ */
+/* ── Alert Banner ── */
 [data-testid="stAlert"] {
     border-radius: 12px;
     border-right: 5px solid;
     font-weight: 500;
 }
-
-[data-testid="stAlert"][kind="error"] {
-    background: var(--danger-bg);
-    border-color: var(--danger);
-    color: var(--danger);
-    animation: pulse 1.5s infinite;
-}
-
-[data-testid="stAlert"][kind="success"] {
-    background: var(--success-bg);
-    border-color: var(--success);
-    color: var(--success);
-}
-
-/* ═══════════════════════════════════════
-   Pulse Animation
-═══════════════════════════════════════ */
 @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.4); }
-    70%  { box-shadow: 0 0 0 10px rgba(192, 57, 43, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(192,57,43,0.4); }
+    70%  { box-shadow: 0 0 0 10px rgba(192,57,43,0); }
+    100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); }
 }
+[data-testid="stAlert"][kind="error"] { animation: pulse 1.5s infinite; }
 
-/* ═══════════════════════════════════════
-   Buttons
-═══════════════════════════════════════ */
-[data-testid="stButton"] button {
-    border-radius: 10px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-}
-
-[data-testid="stButton"] button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
-[data-testid="stButton"] button[kind="primary"] {
-    background: linear-gradient(135deg, var(--navy), var(--navy-mid));
-    border-color: var(--gold);
-    color: var(--gold);
-}
-
-[data-testid="stButton"] button[kind="primary"]:hover {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--navy);
-    border-color: var(--gold);
-}
-
-/* ═══════════════════════════════════════
-   Progress Bar
-═══════════════════════════════════════ */
+/* ── Progress Bar ── */
 [data-testid="stProgress"] > div > div {
-    background: linear-gradient(90deg, var(--navy), var(--gold));
     border-radius: 4px;
 }
 
-/* ═══════════════════════════════════════
-   File Uploader
-═══════════════════════════════════════ */
+/* ── File Uploader ── */
 [data-testid="stFileUploader"] {
-    border: 2px dashed var(--gold);
     border-radius: 14px;
     padding: 24px;
-    background: var(--card-bg);
     text-align: center;
 }
 
-[data-testid="stFileUploader"]:hover {
-    border-color: var(--navy);
-    background: var(--bg);
-}
-
-/* ═══════════════════════════════════════
-   Dataframe
-═══════════════════════════════════════ */
+/* ── Dataframe ── */
 [data-testid="stDataFrame"] {
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid var(--border);
 }
 
-/* ═══════════════════════════════════════
-   Divider
-═══════════════════════════════════════ */
-hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 16px 0;
-}
+/* ── Divider ── */
+hr { border: none; border-top: 1px solid #1e2535; margin: 16px 0; }
 
-/* ═══════════════════════════════════════
-   Caption
-═══════════════════════════════════════ */
-[data-testid="stCaptionContainer"] {
-    color: var(--text-soft);
-    font-size: 0.8rem;
-}
+/* ── Caption ── */
+[data-testid="stCaptionContainer"] { font-size: 0.8rem; }
 
-/* ═══════════════════════════════════════
-   Cards — markdown sections
-═══════════════════════════════════════ */
-[data-testid="stMarkdownContainer"] > div {
-    background: var(--card-bg);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 16px;
-}
+/* لا يوجد أي styling للـ sidebar هنا - كل ده موجود في sidebar.py */
+/* لا يوجد [data-testid="stMarkdownContainer"] > div - كان بيخرب الـ HTML */
