@@ -12,8 +12,6 @@ TRANSLATIONS = {
         "nav_home": "🏠 الرئيسية",
         "nav_image": "📷 رفع صورة",
         "nav_camera": "🎥 كاميرا لايف",
-        "nav_reports": "📊 التقارير",
-        "nav_settings": "⚙️ الإعدادات",
         "dark_toggle": "☀️ فاتح",
         "light_toggle": "🌙 داكن",
         "lang_btn": "🌐 English",
@@ -30,8 +28,6 @@ TRANSLATIONS = {
         "nav_home": "🏠 Home",
         "nav_image": "📷 Upload Image",
         "nav_camera": "🎥 Live Camera",
-        "nav_reports": "📊 Reports",
-        "nav_settings": "⚙️ Settings",
         "dark_toggle": "☀️ Light",
         "light_toggle": "🌙 Dark",
         "lang_btn": "🌐 العربية",
@@ -57,7 +53,6 @@ def _init_session():
         "detection_count": 0,
         "alert_count": 0,
         "user_name": "Admin",
-        "last_update": None,
     }
     
     for key, value in defaults.items():
@@ -77,7 +72,6 @@ def render_sidebar():
 
     # ── تحديد الألوان حسب الوضع (داكن / فاتح) ──
     if dark:
-        # الألوان الداكنة
         BG = "#0a0e17"
         BG_SECONDARY = "#111827"
         BG_CARD = "#1a2234"
@@ -86,12 +80,9 @@ def render_sidebar():
         TEXT_SECONDARY = "#94a3b8"
         TEXT_MUTED = "#64748b"
         BORDER = "#1e293b"
-        BORDER_LIGHT = "#334155"
         GREEN = "#22d3ee"
         BLUE = "#60a5fa"
         RED = "#f87171"
-        PURPLE = "#a78bfa"
-        ORANGE = "#fb923c"
         BUTTON_BG = "#1e293b"
         BUTTON_HOVER = "#334155"
         SHADOW = "rgba(0, 0, 0, 0.4)"
@@ -99,7 +90,6 @@ def render_sidebar():
         STATUS_ONLINE = "#22d3ee"
         STATUS_OFFLINE = "#f87171"
     else:
-        # الألوان الفاتحة
         BG = "#f0f4ff"
         BG_SECONDARY = "#ffffff"
         BG_CARD = "#f8fafc"
@@ -108,12 +98,9 @@ def render_sidebar():
         TEXT_SECONDARY = "#475569"
         TEXT_MUTED = "#94a3b8"
         BORDER = "#e2e8f0"
-        BORDER_LIGHT = "#cbd5e1"
         GREEN = "#0ea5e9"
         BLUE = "#3b82f6"
         RED = "#ef4444"
-        PURPLE = "#8b5cf6"
-        ORANGE = "#f59e0b"
         BUTTON_BG = "#f1f5f9"
         BUTTON_HOVER = "#e2e8f0"
         SHADOW = "rgba(0, 0, 0, 0.08)"
@@ -131,7 +118,6 @@ def render_sidebar():
 
     status_text = t["online"] if status == "online" else t["offline"]
     status_color = STATUS_ONLINE if status == "online" else STATUS_OFFLINE
-    status_dot = "🟢" if status == "online" else "🔴"
 
     # ── CSS المتقدم ──
     st.markdown(f"""
@@ -264,10 +250,9 @@ def render_sidebar():
         display: flex;
         align-items: center;
         gap: 14px;
-        padding: 12px 4px 14px 4px;
+        padding: 12px 16px;
         background: {GRADIENT};
         border-radius: 12px;
-        padding: 12px 16px;
         border: 1px solid {BORDER};
         transition: all 0.3s ease;
     }}
@@ -408,7 +393,6 @@ def render_sidebar():
     .stat-mini-number.green {{ color: {GREEN}; }}
     .stat-mini-number.blue {{ color: {BLUE}; }}
     .stat-mini-number.red {{ color: {RED}; }}
-    .stat-mini-number.purple {{ color: {PURPLE}; }}
     .stat-mini-label {{
         font-size: 0.5rem;
         color: {TEXT_MUTED};
@@ -546,13 +530,11 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        # ── 3) أزرار التنقل ──
+        # ── 3) أزرار التنقل (الصفحات الموجودة فقط) ──
         nav_items = {
-            "home": {"label": t["nav_home"], "target": "app.py", "icon": "🏠"},
-            "image": {"label": t["nav_image"], "target": "pages/image_test.py", "icon": "📷"},
-            "camera": {"label": t["nav_camera"], "target": "pages/live_camera.py", "icon": "🎥"},
-            "reports": {"label": t["nav_reports"], "target": "pages/reports.py", "icon": "📊"},
-            "settings": {"label": t["nav_settings"], "target": "pages/settings.py", "icon": "⚙️"},
+            "home": {"label": t["nav_home"], "target": "app.py"},
+            "image": {"label": t["nav_image"], "target": "pages/image_test.py"},
+            "camera": {"label": t["nav_camera"], "target": "pages/live_camera.py"},
         }
 
         for key, item in nav_items.items():
@@ -560,9 +542,7 @@ def render_sidebar():
             if is_active:
                 st.markdown('<div class="nav-active">', unsafe_allow_html=True)
             
-            # إضافة الأيقونة قبل النص
-            button_label = item["label"]
-            if st.button(button_label, key=f"nav_{key}", use_container_width=True):
+            if st.button(item["label"], key=f"nav_{key}", use_container_width=True):
                 st.session_state["active_page"] = key
                 try:
                     st.switch_page(item["target"])
@@ -595,22 +575,22 @@ def render_sidebar():
         """, unsafe_allow_html=True)
 
         # ── 6) إحصائيات سريعة ──
-        st.markdown("""
+        st.markdown(f"""
         <div class="stats-grid">
             <div class="stat-mini">
-                <span class="stat-mini-number green">{}</span>
+                <span class="stat-mini-number green">{cameras}</span>
                 <span class="stat-mini-label">كاميرات</span>
             </div>
             <div class="stat-mini">
-                <span class="stat-mini-number blue">{}</span>
+                <span class="stat-mini-number blue">{detections}</span>
                 <span class="stat-mini-label">اكتشافات</span>
             </div>
             <div class="stat-mini">
-                <span class="stat-mini-number red">{}</span>
+                <span class="stat-mini-number red">{alerts}</span>
                 <span class="stat-mini-label">تنبيهات</span>
             </div>
         </div>
-        """.format(cameras, detections, alerts), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
         # ── 7) التذييل ──
         st.markdown(f"""
@@ -621,7 +601,6 @@ def render_sidebar():
             <div class="footer-links">
                 <a href="https://github.com" target="_blank">GitHub</a>
                 <a href="https://linkedin.com" target="_blank">LinkedIn</a>
-                <a href="#" target="_blank">Docs</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
