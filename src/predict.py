@@ -1,38 +1,40 @@
 # SafeWatch - src/predict.py
-
 import numpy as np
 from PIL import Image
 from pathlib import Path
+
 try:
     from tflite_runtime.interpreter import Interpreter
 except ImportError:
     from tensorflow.lite.python.interpreter import Interpreter
 
 # ═══════════════════════════════════════
-# تحميل الموديل
+# المسارات
 # ═══════════════════════════════════════
-MODEL_PATH  = Path("models/model_unquant.tflite")
-LABELS_PATH = Path("models/labels.txt")
+ROOT        = Path(__file__).parent.parent
+MODEL_PATH  = ROOT / "models" / "model_unquant.tflite"
+LABELS_PATH = ROOT / "models" / "labels.txt"
 
+# ═══════════════════════════════════════
+# تحميل الموديل (مرة واحدة بس)
+# ═══════════════════════════════════════
+_interpreter = None
 
 def load_model():
-    interpreter = Interpreter(model_path=str(MODEL_PATH))
-    interpreter.allocate_tensors()
-    return interpreter
-
+    global _interpreter
+    if _interpreter is None:
+        _interpreter = Interpreter(model_path=str(MODEL_PATH))
+        _interpreter.allocate_tensors()
+    return _interpreter
 
 def load_labels() -> list:
-    """
-    بتحمل الـ labels من labels.txt
-    """
     with open(LABELS_PATH, "r", encoding="utf-8") as f:
         labels = [
-            line.strip().split(" ", 1)[-1]  # بيشيل الرقم في الأول
+            line.strip().split(" ", 1)[-1]
             for line in f.readlines()
             if line.strip()
         ]
     return labels
-
 
 # ═══════════════════════════════════════
 # الـ Inference
@@ -47,7 +49,6 @@ def predict_image(image: Image.Image) -> tuple[str, float, dict]:
     interpreter = load_model()
     labels      = load_labels()
 
-    # ── تجهيز الصورة ──
     input_details  = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
@@ -56,16 +57,12 @@ def predict_image(image: Image.Image) -> tuple[str, float, dict]:
 
     img = image.convert("RGB").resize((width, height))
     img_array = np.array(img, dtype=np.float32)
-
-    # Normalize
     img_array = (img_array / 127.5) - 1.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # ── تشغيل الموديل ──
     interpreter.set_tensor(input_details[0]["index"], img_array)
     interpreter.invoke()
 
-    # ── النتائج ──
     output = interpreter.get_tensor(output_details[0]["index"])[0]
     scores = {labels[i]: float(output[i]) for i in range(len(labels))}
 
