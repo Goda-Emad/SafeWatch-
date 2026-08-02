@@ -1,37 +1,38 @@
 # SafeWatch - src/alert.py
 
 import csv
-import os
 from datetime import datetime
 from pathlib import Path
 
 # ═══════════════════════════════════════
-# الـ Classes اللي تعتبر suspicious
+# Config
 # ═══════════════════════════════════════
 SUSPICIOUS_CLASSES = ["fighting"]
-
-# ═══════════════════════════════════════
-# الـ Threshold — الحد الأدنى للثقة
-# ═══════════════════════════════════════
-ALERT_THRESHOLD = 0.75
-
-# ═══════════════════════════════════════
-# مسار السجل
-# ═══════════════════════════════════════
-LOG_PATH = Path("alerts/alerts_log.csv")
+ALERT_THRESHOLD    = 0.75
+LOG_PATH           = Path("alerts/alerts_log.csv")
 
 
-def check_alert(label: str, confidence: float) -> bool:
+def check_alert(
+    label: str,
+    confidence: float,
+    threshold: float = None
+) -> bool:
     """
     بتشيك إذا كانت النتيجة تستحق تنبيه
+    بتاخد الـ threshold من الـ slider لو موجود
     """
+    limit = threshold if threshold is not None else ALERT_THRESHOLD
     return (
         label.lower() in SUSPICIOUS_CLASSES
-        and confidence >= ALERT_THRESHOLD
+        and confidence >= limit
     )
 
 
-def log_alert(label: str, confidence: float, image_path: str = None):
+def log_alert(
+    label: str,
+    confidence: float,
+    image_path: str = None
+):
     """
     بتسجل التنبيه في alerts_log.csv
     """
@@ -48,8 +49,8 @@ def log_alert(label: str, confidence: float, image_path: str = None):
             writer.writeheader()
 
         writer.writerow({
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "label": label,
+            "timestamp":  datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "label":      label,
             "confidence": f"{confidence:.2%}",
             "image_path": image_path or "N/A"
         })
