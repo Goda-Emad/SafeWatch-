@@ -8,7 +8,7 @@ BASE = Path(__file__).parent
 # Page Config
 # ═══════════════════════════════════════
 st.set_page_config(
-    page_title="SafeWatch",
+    page_title="SafeWatch — الرئيسية",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,21 +29,23 @@ load_css()
 # Sidebar
 # ═══════════════════════════════════════
 with st.sidebar:
-    # Logo
-    logo_path = BASE / "assets" / "logo.png"
-    if logo_path.exists():
-        try:
-            st.image(str(logo_path), width=150)
-        except Exception:
-            st.title("🛡️")
+    st.markdown("""
+        <div style='text-align:center; padding: 10px 0 4px;'>
+            <span style='font-size:2.8rem;'>🛡️</span>
+            <h2 style='color:#f0a500; margin:4px 0 0;'>SafeWatch</h2>
+            <p style='color:#8a9bb5; font-size:0.8rem; margin:0;'>
+                نظام كشف السلوك المشبوه
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
-    st.title("🛡️ SafeWatch")
-    st.caption("نظام كشف السلوك المشبوه")
     st.divider()
 
     st.markdown("### 📌 الصفحات")
-    st.page_link("pages/image_test.py",  label="🖼️ اختبار صورة")
-    st.page_link("pages/live_camera.py", label="📹 كاميرا مباشرة")
+    st.page_link("app.py",              label="🏠 الرئيسية")
+    st.page_link("pages/image_test.py", label="🖼️ اختبار صورة")
+    st.page_link("pages/live_camera.py",label="📹 كاميرا مباشرة")
+
     st.divider()
 
     st.markdown("### ⚙️ الإعدادات")
@@ -55,18 +57,41 @@ with st.sidebar:
         step=0.05
     )
     st.session_state["threshold"] = threshold
+
     st.divider()
     st.caption("SafeWatch v1.0 — 2026")
 
 # ═══════════════════════════════════════
-# الصفحة الرئيسية
+# Hero Section
 # ═══════════════════════════════════════
-st.title("🛡️ SafeWatch")
-st.subheader("نظام كشف السلوك المشبوه في الوقت الفعلي")
-st.divider()
+st.markdown("""
+    <div style='
+        background: linear-gradient(135deg, #1a2744 0%, #243358 100%);
+        border-radius: 18px;
+        padding: 40px 36px;
+        margin-bottom: 28px;
+        border-left: 5px solid #f0a500;
+        box-shadow: 0 4px 24px rgba(26,39,68,0.13);
+    '>
+        <h1 style='
+            color: #f0a500;
+            font-size: 2.4rem;
+            margin: 0 0 8px;
+            border: none;
+        '>🛡️ SafeWatch</h1>
+        <p style='
+            color: #c8d4e8;
+            font-size: 1.1rem;
+            margin: 0;
+        '>نظام كشف السلوك المشبوه في الوقت الفعلي</p>
+    </div>
+""", unsafe_allow_html=True)
 
+# ═══════════════════════════════════════
 # Stats Row
+# ═══════════════════════════════════════
 col1, col2, col3, col4 = st.columns(4)
+
 with col1:
     st.metric(
         label="🔍 الصور المحللة",
@@ -90,24 +115,51 @@ with col4:
 
 st.divider()
 
-# الوصف
+# ═══════════════════════════════════════
+# Cards Section
+# ═══════════════════════════════════════
 col_a, col_b = st.columns(2)
+
 with col_a:
     st.markdown("""
-    ### 🖼️ اختبار صورة
-    ارفع صورة وحلل السلوك فيها فوراً.
-    - كشف السلوك المشبوه
-    - عرض نسبة الثقة
-    - إرسال تنبيه تلقائي
-    """)
+        <div style='
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid #dce3ed;
+            border-top: 4px solid #f0a500;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            height: 100%;
+        '>
+            <h3 style='color:#1a2744; margin-top:0;'>🖼️ اختبار صورة</h3>
+            <p style='color:#5a6a85;'>ارفع صورة وحلل السلوك فيها فوراً.</p>
+            <ul style='color:#5a6a85; padding-right:18px;'>
+                <li>كشف السلوك المشبوه</li>
+                <li>عرض نسبة الثقة</li>
+                <li>إرسال تنبيه تلقائي</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
     st.page_link("pages/image_test.py", label="ابدأ الاختبار ←")
 
 with col_b:
     st.markdown("""
-    ### 📹 كاميرا مباشرة
-    راقب عبر الكاميرا في الوقت الفعلي.
-    - مراقبة مستمرة
-    - تنبيه فوري
-    - تسجيل الحوادث
-    """)
+        <div style='
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid #dce3ed;
+            border-top: 4px solid #1a2744;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            height: 100%;
+        '>
+            <h3 style='color:#1a2744; margin-top:0;'>📹 كاميرا مباشرة</h3>
+            <p style='color:#5a6a85;'>راقب عبر الكاميرا في الوقت الفعلي.</p>
+            <ul style='color:#5a6a85; padding-right:18px;'>
+                <li>مراقبة مستمرة</li>
+                <li>تنبيه فوري</li>
+                <li>تسجيل الحوادث</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
     st.page_link("pages/live_camera.py", label="شغّل الكاميرا ←")
