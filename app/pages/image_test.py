@@ -9,7 +9,8 @@ from datetime import datetime
 # ═══════════════════════════════════════
 # Path Setup
 # ═══════════════════════════════════════
-sys.path.append(str(Path(__file__).parent.parent.parent))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.append(str(ROOT))
 
 from src.predict import predict_image
 from src.preprocess import preprocess_image, validate_image
@@ -25,9 +26,39 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🖼️ اختبار صورة")
-st.caption("ارفع صورة وحلل السلوك فيها فوراً")
-st.divider()
+# ── Load CSS ──
+def load_css():
+    css_path = Path(__file__).parent.parent / "assets" / "style.css"
+    if css_path.exists():
+        with open(css_path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css()
+
+# ── Sidebar ──
+sys.path.append(str(Path(__file__).parent.parent))
+from components.sidebar import render_sidebar
+render_sidebar()
+
+# ═══════════════════════════════════════
+# Hero
+# ═══════════════════════════════════════
+st.markdown("""
+    <div style='
+        background: linear-gradient(135deg, #1a2744 0%, #243358 100%);
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        border-left: 5px solid #f0a500;
+    '>
+        <h1 style='color:#f0a500; margin:0; font-size:1.9rem; border:none;'>
+            🖼️ اختبار صورة
+        </h1>
+        <p style='color:#c8d4e8; margin:6px 0 0; font-size:0.95rem;'>
+            ارفع صورة وحلل السلوك فيها فوراً
+        </p>
+    </div>
+""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════
 # Upload
@@ -47,15 +78,25 @@ if uploaded_file:
         st.error(f"❌ {msg}")
         st.stop()
 
+    st.divider()
+
     # ── Layout ──
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.markdown("#### 📷 الصورة المرفوعة")
-        st.image(image, width=500)
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:8px;'>
+                📷 الصورة المرفوعة
+            </p>
+        """, unsafe_allow_html=True)
+        st.image(image, use_column_width=True)
 
     with col2:
-        st.markdown("#### 🔍 نتيجة التحليل")
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:8px;'>
+                🔍 نتيجة التحليل
+            </p>
+        """, unsafe_allow_html=True)
 
         with st.spinner("جاري التحليل..."):
             processed = preprocess_image(image)
@@ -65,21 +106,55 @@ if uploaded_file:
         is_alert  = check_alert(label, confidence, threshold)
 
         if is_alert:
-            st.error("🚨 تم اكتشاف سلوك مشبوه!")
-            st.metric("السلوك المكتشف", label.upper())
-            st.metric("نسبة الثقة", f"{confidence:.2%}")
+            st.markdown("""
+                <div style='
+                    background:#fff0f0;
+                    border-radius:12px;
+                    border-right:5px solid #e74c3c;
+                    padding:16px 20px;
+                    margin-bottom:16px;
+                    animation: pulse 1.5s infinite;
+                '>
+                    <span style='color:#c0392b; font-weight:700; font-size:1.1rem;'>
+                        🚨 تم اكتشاف سلوك مشبوه!
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
 
-            audio_path = Path("app/assets/alert_sound.mp3")
+            audio_path = Path(__file__).parent.parent / "assets" / "alert_sound.mp3"
             if audio_path.exists():
                 st.audio(str(audio_path), autoplay=True)
         else:
-            st.success("✅ لا يوجد سلوك مشبوه")
+            st.markdown("""
+                <div style='
+                    background:#edfaf3;
+                    border-radius:12px;
+                    border-right:5px solid #27ae60;
+                    padding:16px 20px;
+                    margin-bottom:16px;
+                '>
+                    <span style='color:#1a7a4a; font-weight:700; font-size:1.1rem;'>
+                        ✅ لا يوجد سلوك مشبوه
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
+
+        # ── Metrics ──
+        m1, m2 = st.columns(2)
+        with m1:
             st.metric("السلوك المكتشف", label.upper())
+        with m2:
             st.metric("نسبة الثقة", f"{confidence:.2%}")
 
         st.divider()
 
-        st.markdown("#### 📊 نسب كل السلوكيات")
+        # ── Scores ──
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:0.95rem; margin-bottom:8px;'>
+                📊 نسب كل السلوكيات
+            </p>
+        """, unsafe_allow_html=True)
+
         for lbl, score in sorted(
             all_scores.items(),
             key=lambda x: x[1],
@@ -93,28 +168,30 @@ if uploaded_file:
     # ═══════════════════════════════════════
     if is_alert:
         st.divider()
-        st.markdown("#### 📧 إجراءات التنبيه")
+
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:12px;'>
+                📧 إجراءات التنبيه
+            </p>
+        """, unsafe_allow_html=True)
+
+        # ── حفظ الصورة مسبقاً ──
+        timestamp       = datetime.now().strftime("%Y%m%d_%H%M%S")
+        screenshots_dir = ROOT / "alerts" / "screenshots"
+        screenshots_dir.mkdir(parents=True, exist_ok=True)
+        screenshot_path = str(screenshots_dir / f"{timestamp}_{label}.jpg")
+        image.save(screenshot_path)
 
         col3, col4 = st.columns(2)
 
         with col3:
             if st.button("📧 إرسال تنبيه بالإيميل", type="primary"):
                 with st.spinner("جاري الإرسال..."):
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    screenshot_path = (
-                        f"alerts/screenshots/{timestamp}_{label}.jpg"
-                    )
-                    Path("alerts/screenshots").mkdir(
-                        parents=True, exist_ok=True
-                    )
-                    image.save(screenshot_path)
-
                     success = send_alert_email(
                         label=label,
                         confidence=confidence,
                         image_path=screenshot_path
                     )
-
                 if success:
                     st.success("✅ تم إرسال التنبيه بنجاح!")
                     st.session_state["total_emails"] = (
