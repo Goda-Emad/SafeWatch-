@@ -1,8 +1,6 @@
 # SafeWatch - app/pages/live_camera.py
 
 import streamlit as st
-import cv2
-import numpy as np
 from PIL import Image
 import sys
 import time
@@ -36,173 +34,110 @@ st.divider()
 # ═══════════════════════════════════════
 # Session State
 # ═══════════════════════════════════════
-if "camera_running" not in st.session_state:
-    st.session_state["camera_running"] = False
-
 if "last_alert_time" not in st.session_state:
     st.session_state["last_alert_time"] = 0
 
-if "frame_count" not in st.session_state:
-    st.session_state["frame_count"] = 0
+ALERT_COOLDOWN = 30
 
 # ═══════════════════════════════════════
-# Settings
+# Camera Input
 # ═══════════════════════════════════════
-ALERT_COOLDOWN = 30   # ثانية بين كل تنبيه وتاني
-PREDICT_EVERY  = 10   # بيعمل predict كل 10 frames
+threshold = st.session_state.get("threshold", 0.75)
 
-# ═══════════════════════════════════════
-# Controls
-# ═══════════════════════════════════════
-col_ctrl1, col_ctrl2, col_ctrl3 = st.columns(3)
-
-with col_ctrl1:
-    start_btn = st.button(
-        "▶️ تشغيل الكاميرا",
-        type="primary",
-        disabled=st.session_state["camera_running"]
-    )
-
-with col_ctrl2:
-    stop_btn = st.button(
-        "⏹️ إيقاف الكاميرا",
-        disabled=not st.session_state["camera_running"]
-    )
-
-with col_ctrl3:
-    threshold = st.session_state.get("threshold", 0.75)
+col_info, col_thresh = st.columns([3, 1])
+with col_info:
+    st.info("📸 التقط صورة من الكاميرا وسيتم تحليلها فوراً")
+with col_thresh:
     st.metric("حد التنبيه", f"{threshold:.0%}")
-
-if start_btn:
-    st.session_state["camera_running"] = True
-
-if stop_btn:
-    st.session_state["camera_running"] = False
 
 st.divider()
 
-# ═══════════════════════════════════════
-# Camera Feed
-# ═══════════════════════════════════════
-if st.session_state["camera_running"]:
+camera_image = st.camera_input("التقط صورة")
 
-    col1, col2 = st.columns([2, 1])
+if camera_image:
+    image = Image.open(camera_image)
+
+    col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.markdown("#### 📷 البث المباشر")
-        frame_placeholder  = st.empty()
-        status_placeholder = st.empty()
+        st.markdown("#### 📷 الصورة الملتقطة")
+        st.image(image, width=400)
 
     with col2:
-        st.markdown("#### 📊 التحليل")
-        result_placeholder = st.empty()
-        scores_placeholder = st.empty()
+        st.markdown("#### 🔍 نتيجة التحليل")
+
+        with st.spinner("جاري التحليل..."):
+            pil_image = preprocess_frame(image)
+            label, confidence, all_scores = predict_image(pil_image)
+
+        is_alert = check_alert(label, confidence, threshold)
+
+        if is_alert:
+            st.error("🚨 تم اكتشاف سلوك مشبوه!")
+        else:
+            st.success("✅ لا يوجد سلوك مشبوه")
+
+        st.metric("السلوك المكتشف", label.upper())
+        st.metric("نسبة الثقة", f"{confidence:.2%}")
+
         st.divider()
-        st.markdown("#### 🚨 التنبيهات")
-        alert_placeholder  = st.empty()
+        st.markdown("#### 📊 نسب كل السلوكيات")
+        for lbl, score in sorted(
+            all_scores.items(),
+            key=lambda x: x[1],
+            reverse=True
+        ):
+            color = "🔴" if lbl == "fighting" else "🟢"
+            st.progress(score, text=f"{color} {lbl}: {score:.2%}")
 
-    # ── فتح الكاميرا ──
-    cap = cv2.VideoCapture(0)
+    # ═══════════════════════════════════════
+    # Alert Actions
+    # ═══════════════════════════════════════
+    if is_alert:
+        st.divider()
+        st.markdown("#### 📧 إجراءات التنبيه")
 
-    if not cap.isOpened():
-        st.error("❌ مش قادر يفتح الكاميرا — تأكد إنها متوصلة")
-        st.session_state["camera_running"] = False
-        st.stop()
+        current_time    = time.time()
+        cooldown_passed = (
+            current_time - st.session_state["last_alert_time"]
+            > ALERT_COOLDOWN
+        )
 
-    try:
-        while st.session_state["camera_running"]:
-            ret, frame = cap.read()
+        # حفظ الصورة
+        timestamp       = datetime.now().strftime("%Y%m%d_%H%M%S")
+        screenshots_dir = ROOT / "alerts" / "screenshots"
+        screenshots_dir.mkdir(parents=True, exist_ok=True)
+        screenshot_path = str(screenshots_dir / f"{timestamp}_{label}.jpg")
+        image.save(screenshot_path)
 
-            if not ret:
-                st.error("❌ مشكلة في قراءة الكاميرا")
-                break
+        col3, col4 = st.columns(2)
 
-            st.session_state["frame_count"] += 1
-
-            # ── عرض الـ Frame ──
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame_placeholder.image(
-                frame_rgb,
-                channels="RGB",
-                use_column_width=True        # ✅ متوافق مع Streamlit 1.35
-            )
-
-            # ── Predict كل X frames ──
-            if st.session_state["frame_count"] % PREDICT_EVERY == 0:
-
-                pil_image = preprocess_frame(frame_rgb)
-                label, confidence, all_scores = predict_image(pil_image)
-
-                # عرض النتيجة
-                result_placeholder.metric(
-                    label="السلوك المكتشف",
-                    value=label.upper(),
-                    delta=f"{confidence:.2%}"
-                )
-
-                # عرض الـ Scores
-                scores_text = "\n".join([
-                    f"{k}: {v:.2%}"
-                    for k, v in sorted(
-                        all_scores.items(),
-                        key=lambda x: x[1],
-                        reverse=True
-                    )[:3]
-                ])
-                scores_placeholder.code(scores_text)
-
-                # ── Alert ──
-                is_alert = check_alert(label, confidence, threshold)
-                current_time   = time.time()
-                cooldown_passed = (
-                    current_time - st.session_state["last_alert_time"]
-                    > ALERT_COOLDOWN
-                )
-
-                if is_alert and cooldown_passed:
-                    st.session_state["last_alert_time"] = current_time
-
-                    # عرض التنبيه
-                    alert_placeholder.error(
-                        f"🚨 {label.upper()} — {confidence:.2%}"
-                    )
-
-                    # حفظ الصورة
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    screenshots_dir = ROOT / "alerts" / "screenshots"
-                    screenshots_dir.mkdir(parents=True, exist_ok=True)
-                    screenshot_path = str(
-                        screenshots_dir / f"{timestamp}_{label}.jpg"
-                    )
-                    Image.fromarray(frame_rgb).save(screenshot_path)
-
-                    # تسجيل وإرسال
-                    log_alert(label, confidence, screenshot_path)
-                    send_alert_email(
+        with col3:
+            if st.button("📧 إرسال تنبيه بالإيميل", type="primary"):
+                with st.spinner("جاري الإرسال..."):
+                    success = send_alert_email(
                         label=label,
                         confidence=confidence,
                         image_path=screenshot_path
                     )
-
-                    # تحديث الإحصائيات
-                    st.session_state["total_alerts"] = (
-                        st.session_state.get("total_alerts", 0) + 1
-                    )
+                if success:
+                    st.success("✅ تم إرسال التنبيه بنجاح!")
                     st.session_state["total_emails"] = (
                         st.session_state.get("total_emails", 0) + 1
                     )
-
+                    st.session_state["last_alert_time"] = current_time
                 else:
-                    alert_placeholder.success("✅ لا يوجد سلوك مشبوه")
+                    st.error("❌ فشل إرسال الإيميل")
 
-            status_placeholder.caption(
-                f"Frames: {st.session_state['frame_count']}"
-            )
+        with col4:
+            if st.button("📝 تسجيل الحادثة"):
+                log_alert(label, confidence, screenshot_path)
+                st.success("✅ تم تسجيل الحادثة")
 
-            time.sleep(0.03)  # ~30 FPS
+        st.session_state["total_alerts"] = (
+            st.session_state.get("total_alerts", 0) + 1
+        )
 
-    finally:
-        cap.release()
-
-else:
-    st.info("👆 اضغط تشغيل الكاميرا للبدء")
+    st.session_state["total_predictions"] = (
+        st.session_state.get("total_predictions", 0) + 1
+    )
