@@ -30,17 +30,19 @@ load_css()
 with st.sidebar:
     # Logo
     logo_path = Path("app/assets/logo.png")
-if logo_path.exists():
-    try:
-        st.image(str(logo_path), width=150)
-    except Exception:
-        st.title("🛡️ SafeWatch")
+    if logo_path.exists():
+        try:
+            st.image(str(logo_path), width=150)
+        except Exception:
+            st.title("🛡️")
+
+    st.title("🛡️ SafeWatch")
     st.caption("نظام كشف السلوك المشبوه")
     st.divider()
 
     st.markdown("### 📌 الصفحات")
-    st.page_link("app/pages/image_test.py",   label="🖼️ اختبار صورة",    icon="🖼️")
-    st.page_link("app/pages/live_camera.py",  label="📹 كاميرا مباشرة",  icon="📹")
+    st.page_link("pages/image_test.py",  label="🖼️ اختبار صورة")
+    st.page_link("pages/live_camera.py", label="📹 كاميرا مباشرة")
     st.divider()
 
     st.markdown("### ⚙️ الإعدادات")
@@ -103,7 +105,7 @@ with col_a:
     - عرض نسبة الثقة
     - إرسال تنبيه تلقائي
     """)
-    st.page_link("app/pages/image_test.py", label="ابدأ الاختبار ←")
+    st.page_link("pages/image_test.py", label="ابدأ الاختبار ←")
 
 with col_b:
     st.markdown("""
@@ -113,4 +115,4 @@ with col_b:
     - تنبيه فوري
     - تسجيل الحوادث
     """)
-    st.page_link("app/pages/live_camera.py", label="شغّل الكاميرا ←")
+    st.page_link("pages/live_camera.py", label="شغّل الكاميرا ←")
