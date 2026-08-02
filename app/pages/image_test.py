@@ -1,4 +1,4 @@
-# ActionLens - app/pages/image_test.py
+# SafeWatch - app/pages/image_test.py
 import streamlit as st
 from PIL import Image
 import sys
@@ -15,8 +15,8 @@ from src.alert import check_alert, log_alert
 from src.email_sender import send_alert_email
 
 st.set_page_config(
-    page_title="ActionLens — رفع صورة",
-    page_icon="🖼️",
+    page_title="SafeWatch — رفع صورة",
+    page_icon="🛡️",
     layout="wide"
 )
 
@@ -36,8 +36,60 @@ else:
     TEXT = "#1a2744"; SUB = "#64748b"; MET_BG = "#f8fafc"
     ALERT_R_BG = "#fff0f0"; ALERT_G_BG = "#edfaf3"
 
-GREEN = "#63d28c"; BLUE = "#4f8ef7"
+GREEN = "#63d28c"; BLUE = "#4f8ef7"; RED = "#e74c3c"; ORANGE = "#f39c12"
 
+# ============================================================
+# 🎯 قائمة السلوكيات ورموزها
+# ============================================================
+ACTION_NAMES = {
+    0: "Fighting",
+    1: "Running",
+    2: "Sleeping",
+    3: "Hugging",
+    4: "Dancing",
+    5: "Texting",
+    6: "Eating",
+    7: "Cycling",
+}
+
+ACTION_ICONS = {
+    "Fighting": "⚔️",
+    "Running": "🏃",
+    "Sleeping": "😴",
+    "Hugging": "🤗",
+    "Dancing": "💃",
+    "Texting": "📱",
+    "Eating": "🍽️",
+    "Cycling": "🚴",
+}
+
+ACTION_COLORS = {
+    "Fighting": RED,
+    "Running": ORANGE,
+    "Sleeping": GREEN,
+    "Hugging": GREEN,
+    "Dancing": ORANGE,
+    "Texting": GREEN,
+    "Eating": GREEN,
+    "Cycling": ORANGE,
+}
+
+# ============================================================
+# 🚨 السلوكيات المشبوهة (اللي تسبب إنذار تلقائي)
+# ============================================================
+SUSPICIOUS_ACTIONS = ["Fighting"]  # فقط Fighting يرسل إنذار
+
+
+def get_action_name(index: int) -> str:
+    """الحصول على اسم السلوك من رقمه"""
+    return ACTION_NAMES.get(index, f"Unknown_{index}")
+
+
+def is_suspicious(action: str) -> bool:
+    """التحقق إذا كان السلوك مشبوهاً"""
+    return action in SUSPICIOUS_ACTIONS
+
+# ── CSS ──
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
@@ -57,7 +109,7 @@ hr {{ border-color: {CARD_BOR} !important; }}
 """, unsafe_allow_html=True)
 
 # ── Hero ──
-hero_title = "🖼️ رفع صورة" if lang == "ar" else "🖼️ Upload Image"
+hero_title = "🛡️ رفع صورة" if lang == "ar" else "🛡️ Upload Image"
 hero_sub   = "ارفع صورة وحلل الحركة فوراً" if lang == "ar" else "Upload an image and detect actions instantly"
 st.markdown(f"""
 <div style="background:linear-gradient(135deg,{CARD_BG},{MET_BG});
@@ -92,15 +144,29 @@ if uploaded_file:
         with st.spinner("جاري التحليل..." if lang=="ar" else "Analyzing..."):
             processed = preprocess_image(image)
             label, confidence, all_scores = predict_image(processed)
+            
+            # إذا كان الـ label رقم، نحوله إلى اسم
+            if isinstance(label, int):
+                label = get_action_name(label)
+            
+            # ترتيب النتائج
+            if all_scores:
+                if isinstance(list(all_scores.keys())[0], int):
+                    all_scores = {get_action_name(k): v for k, v in all_scores.items()}
+                all_scores = dict(sorted(all_scores.items(), key=lambda x: x[1], reverse=True))
 
         threshold = st.session_state.get("threshold", 0.75)
-        is_alert  = check_alert(label, confidence, threshold)
+        is_alert = check_alert(label, confidence, threshold)
 
+        # ── عرض النتيجة ──
+        action_color = ACTION_COLORS.get(label, GREEN)
+        action_icon = ACTION_ICONS.get(label, "🔵")
+        
         if is_alert:
             st.markdown(f"""
             <div style="background:{ALERT_R_BG};border-radius:12px;
-                        border-right:5px solid #e74c3c;padding:14px 18px;margin-bottom:14px;">
-                <span style="color:#e74c3c;font-weight:700;font-size:1rem;">
+                        border-right:5px solid {RED};padding:14px 18px;margin-bottom:14px;">
+                <span style="color:{RED};font-weight:700;font-size:1rem;">
                     🚨 {"تم اكتشاف سلوك مشبوه!" if lang=="ar" else "Suspicious behavior detected!"}
                 </span>
             </div>""", unsafe_allow_html=True)
@@ -116,42 +182,73 @@ if uploaded_file:
                 </span>
             </div>""", unsafe_allow_html=True)
 
+        # ── عرض السلوك المكتشف ──
+        st.markdown(f"""
+        <div style="background:{CARD_BG};border-radius:12px;
+                    border:1px solid {CARD_BOR};padding:16px;
+                    margin-bottom:12px;text-align:center;">
+            <div style="font-size:2.5rem;">{action_icon}</div>
+            <div style="font-size:1.8rem;font-weight:800;color:{action_color};">
+                {label}
+            </div>
+            <div style="font-size:0.8rem;color:{SUB};">
+                {f'الثقة: {confidence:.2%}' if lang=='ar' else f'Confidence: {confidence:.2%}'}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
         m1, m2 = st.columns(2)
         with m1: st.metric("السلوك" if lang=="ar" else "Action", label.upper())
         with m2: st.metric("الثقة" if lang=="ar" else "Confidence", f"{confidence:.2%}")
 
         st.divider()
         st.markdown(f'<div style="color:{TEXT};font-weight:700;font-size:0.88rem;margin-bottom:8px;">📊 {"نسب كل السلوكيات" if lang=="ar" else "All Action Scores"}</div>', unsafe_allow_html=True)
-        for lbl, score in sorted(all_scores.items(), key=lambda x: x[1], reverse=True):
-            icon = "🔴" if lbl == "fighting" else "🟢"
+        
+        for lbl, score in list(all_scores.items())[:8]:  # عرض كل السلوكيات
+            icon = ACTION_ICONS.get(lbl, "🔵")
+            color = ACTION_COLORS.get(lbl, GREEN)
             st.progress(score, text=f"{icon} {lbl}: {score:.2%}")
 
-    if is_alert:
-        st.divider()
-        st.markdown(f'<div style="color:{TEXT};font-weight:700;font-size:0.95rem;margin-bottom:12px;">📧 {"إجراءات التنبيه" if lang=="ar" else "Alert Actions"}</div>', unsafe_allow_html=True)
-
+    # ============================================================
+    # ⚡ إرسال إنذار تلقائي عند اكتشاف سلوك مشبوه
+    # ============================================================
+    if is_alert and is_suspicious(label):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         screenshots_dir = ROOT / "alerts" / "screenshots"
         screenshots_dir.mkdir(parents=True, exist_ok=True)
         screenshot_path = str(screenshots_dir / f"{timestamp}_{label}.jpg")
         image.save(screenshot_path)
 
-        col3, col4 = st.columns(2)
-        with col3:
-            if st.button("📧 إرسال تنبيه" if lang=="ar" else "📧 Send Alert", type="primary"):
-                with st.spinner("جاري الإرسال..." if lang=="ar" else "Sending..."):
-                    success = send_alert_email(label=label, confidence=confidence, image_path=screenshot_path)
-                if success:
-                    st.success("✅ تم الإرسال!")
-                    st.session_state["total_emails"] = st.session_state.get("total_emails", 0) + 1
-                else:
-                    st.error("❌ فشل الإرسال")
-        with col4:
-            if st.button("📝 تسجيل" if lang=="ar" else "📝 Log"):
-                log_alert(label, confidence, screenshot_path)
-                st.success("✅ تم التسجيل!")
-
         st.session_state["total_alerts"] = st.session_state.get("total_alerts", 0) + 1
 
+        # 🚨 إرسال الإيميل تلقائياً
+        with st.spinner("📧 جاري إرسال إنذار إلى المسؤول..." if lang=="ar" else "📧 Sending alert to admin..."):
+            success = send_alert_email(
+                label=label,
+                confidence=confidence,
+                image_path=screenshot_path
+            )
+        
+        if success:
+            st.success("✅ تم إرسال الإنذار إلى المسؤول عبر البريد الإلكتروني" if lang=="ar" else "✅ Alert sent to admin via email")
+            st.session_state["total_emails"] = st.session_state.get("total_emails", 0) + 1
+            
+            st.markdown(f"""
+            <div style="background:{ALERT_R_BG};border-radius:12px;
+                        border:1px solid {RED};padding:12px 16px;margin-top:8px;">
+                <span style="color:{RED};font-weight:600;font-size:0.9rem;">
+                    📧 {f"تم إرسال التنبيه تلقائياً" if lang=="ar" else "Alert sent automatically"}
+                </span>
+                <span style="color:{SUB};font-size:0.75rem;display:block;margin-top:4px;">
+                    ⏰ {datetime.now().strftime("%H:%M:%S")} | 🏷️ {label.upper()} | 📊 {confidence:.2%}
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.warning("⚠️ فشل إرسال الإيميل - تأكد من إعدادات Gmail" if lang=="ar" else "⚠️ Failed to send email - Check Gmail settings")
+        
+        log_alert(label, confidence, screenshot_path)
+
+    # ── تحديث الإحصائيات ──
     st.session_state["total_predictions"] = st.session_state.get("total_predictions", 0) + 1
     st.session_state["top_action"] = label
