@@ -3,8 +3,10 @@
 import numpy as np
 from PIL import Image
 from pathlib import Path
-import tensorflow as tf
-
+try:
+    from tflite_runtime.interpreter import Interpreter
+except ImportError:
+    from tensorflow.lite.python.interpreter import Interpreter
 
 # ═══════════════════════════════════════
 # تحميل الموديل
