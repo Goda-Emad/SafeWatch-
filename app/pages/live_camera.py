@@ -27,9 +27,19 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📹 كاميرا مباشرة")
-st.caption("مراقبة السلوك في الوقت الفعلي")
-st.divider()
+# ── Load CSS ──
+def load_css():
+    css_path = Path(__file__).parent.parent / "assets" / "style.css"
+    if css_path.exists():
+        with open(css_path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css()
+
+# ── Sidebar ──
+sys.path.append(str(Path(__file__).parent.parent))
+from components.sidebar import render_sidebar
+render_sidebar()
 
 # ═══════════════════════════════════════
 # Session State
@@ -40,31 +50,76 @@ if "last_alert_time" not in st.session_state:
 ALERT_COOLDOWN = 30
 
 # ═══════════════════════════════════════
-# Camera Input
+# Hero
+# ═══════════════════════════════════════
+st.markdown("""
+    <div style='
+        background: linear-gradient(135deg, #1a2744 0%, #243358 100%);
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        border-left: 5px solid #f0a500;
+    '>
+        <h1 style='color:#f0a500; margin:0; font-size:1.9rem; border:none;'>
+            📹 كاميرا مباشرة
+        </h1>
+        <p style='color:#c8d4e8; margin:6px 0 0; font-size:0.95rem;'>
+            التقط صورة من الكاميرا وسيتم تحليلها فوراً
+        </p>
+    </div>
+""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════
+# Info + Threshold
 # ═══════════════════════════════════════
 threshold = st.session_state.get("threshold", 0.75)
 
 col_info, col_thresh = st.columns([3, 1])
 with col_info:
-    st.info("📸 التقط صورة من الكاميرا وسيتم تحليلها فوراً")
+    st.markdown("""
+        <div style='
+            background: #eaf1fb;
+            border-radius: 12px;
+            border-right: 4px solid #1a2744;
+            padding: 14px 18px;
+            color: #1a2744;
+            font-weight: 600;
+            font-size: 0.95rem;
+        '>
+            📸 التقط صورة من الكاميرا وسيتم تحليلها فوراً
+        </div>
+    """, unsafe_allow_html=True)
 with col_thresh:
     st.metric("حد التنبيه", f"{threshold:.0%}")
 
 st.divider()
 
-camera_image = st.camera_input("التقط صورة")
+# ═══════════════════════════════════════
+# Camera Input
+# ═══════════════════════════════════════
+camera_image = st.camera_input("📷 التقط صورة")
 
 if camera_image:
     image = Image.open(camera_image)
 
+    st.divider()
+
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.markdown("#### 📷 الصورة الملتقطة")
-        st.image(image, width=400)
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:8px;'>
+                📷 الصورة الملتقطة
+            </p>
+        """, unsafe_allow_html=True)
+        st.image(image, use_column_width=True)
 
     with col2:
-        st.markdown("#### 🔍 نتيجة التحليل")
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:8px;'>
+                🔍 نتيجة التحليل
+            </p>
+        """, unsafe_allow_html=True)
 
         with st.spinner("جاري التحليل..."):
             pil_image = preprocess_frame(image)
@@ -73,15 +128,48 @@ if camera_image:
         is_alert = check_alert(label, confidence, threshold)
 
         if is_alert:
-            st.error("🚨 تم اكتشاف سلوك مشبوه!")
+            st.markdown("""
+                <div style='
+                    background:#fff0f0;
+                    border-radius:12px;
+                    border-right:5px solid #e74c3c;
+                    padding:16px 20px;
+                    margin-bottom:16px;
+                '>
+                    <span style='color:#c0392b; font-weight:700; font-size:1.1rem;'>
+                        🚨 تم اكتشاف سلوك مشبوه!
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
         else:
-            st.success("✅ لا يوجد سلوك مشبوه")
+            st.markdown("""
+                <div style='
+                    background:#edfaf3;
+                    border-radius:12px;
+                    border-right:5px solid #27ae60;
+                    padding:16px 20px;
+                    margin-bottom:16px;
+                '>
+                    <span style='color:#1a7a4a; font-weight:700; font-size:1.1rem;'>
+                        ✅ لا يوجد سلوك مشبوه
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
 
-        st.metric("السلوك المكتشف", label.upper())
-        st.metric("نسبة الثقة", f"{confidence:.2%}")
+        m1, m2 = st.columns(2)
+        with m1:
+            st.metric("السلوك المكتشف", label.upper())
+        with m2:
+            st.metric("نسبة الثقة", f"{confidence:.2%}")
 
         st.divider()
-        st.markdown("#### 📊 نسب كل السلوكيات")
+
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:0.95rem; margin-bottom:8px;'>
+                📊 نسب كل السلوكيات
+            </p>
+        """, unsafe_allow_html=True)
+
         for lbl, score in sorted(
             all_scores.items(),
             key=lambda x: x[1],
@@ -95,7 +183,12 @@ if camera_image:
     # ═══════════════════════════════════════
     if is_alert:
         st.divider()
-        st.markdown("#### 📧 إجراءات التنبيه")
+
+        st.markdown("""
+            <p style='color:#1a2744; font-weight:700; font-size:1rem; margin-bottom:12px;'>
+                📧 إجراءات التنبيه
+            </p>
+        """, unsafe_allow_html=True)
 
         current_time    = time.time()
         cooldown_passed = (
