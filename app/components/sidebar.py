@@ -3,34 +3,34 @@ import streamlit as st
 
 TRANSLATIONS = {
     "ar": {
-        "brand_sub":    "نظام التعرف على الحركة",
-        "nav_home":     "🏠  الرئيسية",
-        "nav_image":    "🖼️  رفع صورة",
-        "nav_camera":   "📹  كاميرا لايف",
+        "brand_sub": "نظام التعرف على الحركة",
+        "nav_home": "🏠 الرئيسية",
+        "nav_image": "🖼️ رفع صورة",
+        "nav_camera": "📹 كاميرا لايف",
         "stat_analyses": "🔍 تحليلات",
         "stat_actions": "🎯 إجراءات",
-        "stat_alerts":  "🚨 تنبيهات",
-        "dark_toggle":  "☀️ فاتح",
+        "stat_alerts": "🚨 تنبيهات",
+        "dark_toggle": "☀️ فاتح",
         "light_toggle": "🌙 داكن",
-        "lang_btn":     "🌐 English",
-        "nav_label":    "القائمة",
-        "stats_label":  "إحصائيات الجلسة",
-        "footer_sub":   "التعرف على الحركة بالذكاء الاصطناعي",
+        "lang_btn": "🌐 English",
+        "nav_label": "القائمة",
+        "stats_label": "إحصائيات الجلسة",
+        "footer_sub": "التعرف على الحركة بالذكاء الاصطناعي",
     },
     "en": {
-        "brand_sub":    "Action Recognition System",
-        "nav_home":     "🏠  Home",
-        "nav_image":    "🖼️  Upload Image",
-        "nav_camera":   "📹  Live Camera",
+        "brand_sub": "Action Recognition System",
+        "nav_home": "🏠 Home",
+        "nav_image": "🖼️ Upload Image",
+        "nav_camera": "📹 Live Camera",
         "stat_analyses": "🔍 Analyses",
         "stat_actions": "🎯 Actions",
-        "stat_alerts":  "🚨 Alerts",
-        "dark_toggle":  "☀️ Light",
+        "stat_alerts": "🚨 Alerts",
+        "dark_toggle": "☀️ Light",
         "light_toggle": "🌙 Dark",
-        "lang_btn":     "🌐 العربية",
-        "nav_label":    "NAVIGATION",
-        "stats_label":  "SESSION STATS",
-        "footer_sub":   "AI-Powered Action Recognition",
+        "lang_btn": "🌐 العربية",
+        "nav_label": "NAVIGATION",
+        "stats_label": "SESSION STATS",
+        "footer_sub": "AI-Powered Action Recognition",
     },
 }
 
@@ -61,57 +61,57 @@ def render_sidebar():
 
     # ── تحديد الألوان حسب الوضع (داكن / فاتح) ──
     if dark:
-        BG       = "#0d1117"
-        BTN_BG   = "#161b27"
-        BTN_HVR  = "#1e2535"
-        BTN_TXT  = "#c9d1e0"
-        ACT_BG   = "#0f1f15"
-        DIVIDER  = "#1e2535"
-        LABEL    = "#4a5568"
-        CARD_BG  = "#111622"
-        CARD_BOR = "#1e2535"
-        APP_BG   = "#0a0e15"
-        SHADOW   = "rgba(0,0,0,0.4)"
+        BG = "#0d1117"
+        CARD_BG = "#161b22"
+        CARD_BORDER = "#30363d"
+        TEXT_COLOR = "#c9d1d9"
+        LABEL_COLOR = "#8b949e"
+        GREEN = "#58a6ff"
+        BLUE = "#58a6ff"
+        RED = "#f85149"
+        BUTTON_BG = "#21262d"
+        BUTTON_HOVER = "#30363d"
+        DIVIDER = "#30363d"
+        ACTIVE_BG = "#0d1f2d"
     else:
-        BG       = "#f0f4f8"
-        BTN_BG   = "#ffffff"
-        BTN_HVR  = "#e8edf5"
-        BTN_TXT  = "#1a2744"
-        ACT_BG   = "#f0fff5"
-        DIVIDER  = "#dce3ed"
-        LABEL    = "#94a3b8"
-        CARD_BG  = "#ffffff"
-        CARD_BOR = "#dce3ed"
-        APP_BG   = "#eef2f7"
-        SHADOW   = "rgba(0,0,0,0.08)"
-
-    GREEN = "#63d28c"
-    BLUE  = "#4f8ef7"
-    RED   = "#e74c3c"
+        BG = "#ffffff"
+        CARD_BG = "#f6f8fa"
+        CARD_BORDER = "#d0d7de"
+        TEXT_COLOR = "#24292f"
+        LABEL_COLOR = "#57606a"
+        GREEN = "#2da44e"
+        BLUE = "#0969da"
+        RED = "#cf222e"
+        BUTTON_BG = "#f6f8fa"
+        BUTTON_HOVER = "#f3f4f6"
+        DIVIDER = "#d0d7de"
+        ACTIVE_BG = "#ddf4ff"
 
     # ── جلب البيانات من الجلسة ──
     analyses = st.session_state.get("total_predictions", 0)
-    actions  = st.session_state.get("top_action", "—")
-    alerts   = st.session_state.get("total_alerts", 0)
-    page     = st.session_state.get("active_page", "home")
+    actions = st.session_state.get("top_action", "—")
+    alerts = st.session_state.get("total_alerts", 0)
+    page = st.session_state.get("active_page", "home")
 
     # ── CSS التنسيقات العامة ──
     st.markdown(f"""
     <style>
     /* ===== تنسيق الـ Sidebar ===== */
-    [data-testid="stSidebar"] > div:first-child {{
-        background: {BG} !important;
-        padding: 0 !important;
-    }}
     [data-testid="stSidebar"] {{
         background: {BG} !important;
         border-right: 1px solid {DIVIDER} !important;
     }}
-    [data-testid="stSidebarNav"] {{ display: none !important; }}
+    [data-testid="stSidebar"] > div:first-child {{
+        background: {BG} !important;
+        padding: 0 !important;
+    }}
+    [data-testid="stSidebarNav"] {{
+        display: none !important;
+    }}
     
     /* ===== إزالة المسافات الداخلية ===== */
     [data-testid="stSidebar"] section[data-testid="stSidebarContent"] {{
-        padding: 12px 12px 20px 12px !important;
+        padding: 1rem 1rem 2rem 1rem !important;
     }}
     [data-testid="stSidebar"] .block-container {{
         padding: 0 !important;
@@ -123,50 +123,54 @@ def render_sidebar():
     
     /* ===== الخطوط ===== */
     [data-testid="stSidebar"] * {{
-        font-family: 'Cairo', 'Segoe UI', sans-serif !important;
+        font-family: 'Segoe UI', 'Cairo', sans-serif !important;
     }}
     
     /* ===== الأزرار ===== */
     [data-testid="stSidebar"] .stButton {{
-        margin: 0 0 5px 0 !important;
+        margin: 0 0 6px 0 !important;
         padding: 0 !important;
     }}
     [data-testid="stSidebar"] .stButton > button {{
-        background: {BTN_BG} !important;
-        color: {BTN_TXT} !important;
-        border: 1px solid {DIVIDER} !important;
-        border-radius: 10px !important;
+        background: {BUTTON_BG} !important;
+        color: {TEXT_COLOR} !important;
+        border: 1px solid {CARD_BORDER} !important;
+        border-radius: 8px !important;
         width: 100% !important;
-        padding: 11px 14px !important;
-        font-size: 0.90rem !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.9rem !important;
         font-weight: 600 !important;
         text-align: center !important;
-        transition: all 0.18s ease !important;
+        transition: all 0.2s ease !important;
         box-shadow: none !important;
         height: auto !important;
-        line-height: 1.4 !important;
+        line-height: 1.5 !important;
         white-space: normal !important;
     }}
     [data-testid="stSidebar"] .stButton > button:hover {{
-        background: {BTN_HVR} !important;
+        background: {BUTTON_HOVER} !important;
+        border-color: {GREEN} !important;
         color: {GREEN} !important;
-        border-color: {GREEN}66 !important;
+        transform: translateY(-1px);
+    }}
+    [data-testid="stSidebar"] .stButton > button:active {{
+        transform: translateY(0px);
     }}
     
     /* ===== الزر النشط ===== */
     .nav-active .stButton > button {{
-        background: {ACT_BG} !important;
+        background: {ACTIVE_BG} !important;
         color: {GREEN} !important;
-        border: 1px solid {GREEN}55 !important;
-        border-left: 3px solid {GREEN} !important;
+        border: 1px solid {GREEN} !important;
+        border-left: 4px solid {GREEN} !important;
         font-weight: 700 !important;
     }}
     
     /* ===== أزرار التبديل الصغيرة ===== */
     .toggle-btn .stButton > button {{
-        font-size: 0.76rem !important;
-        padding: 7px 6px !important;
-        border-radius: 8px !important;
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.5rem !important;
+        border-radius: 6px !important;
     }}
     .toggle-btn .stButton {{
         margin-bottom: 0 !important;
@@ -174,8 +178,8 @@ def render_sidebar():
     
     /* ===== الأعمدة ===== */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {{
-        gap: 6px !important;
-        margin: 0 0 5px 0 !important;
+        gap: 8px !important;
+        margin: 0 0 6px 0 !important;
     }}
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > div {{
         padding: 0 !important;
@@ -183,127 +187,126 @@ def render_sidebar():
     }}
     
     /* ===== خلفية التطبيق ===== */
-    .stApp {{ background: {APP_BG} !important; }}
+    .stApp {{
+        background: {BG} !important;
+    }}
     
     /* ===== تنسيق البطاقات الإحصائية ===== */
     .stat-card {{
         background: {CARD_BG};
-        border: 1px solid {CARD_BOR};
-        border-radius: 10px;
-        padding: 10px 13px;
-        margin-bottom: 5px;
+        border: 1px solid {CARD_BORDER};
+        border-radius: 8px;
+        padding: 0.7rem 1rem;
+        margin-bottom: 6px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        transition: all 0.2s ease;
+    }}
+    .stat-card:hover {{
+        border-color: {GREEN};
+        transform: translateX(4px);
     }}
     .stat-label {{
-        color: {LABEL};
-        font-size: 0.82rem;
+        color: {LABEL_COLOR};
+        font-size: 0.85rem;
+        font-weight: 500;
     }}
-    .stat-value-green {{
+    .stat-value {{
+        font-weight: 700;
+        font-size: 1rem;
+    }}
+    .stat-green {{ 
         color: {GREEN};
-        font-weight: 700;
-        font-size: 0.95rem;
     }}
-    .stat-value-blue {{
+    .stat-blue {{ 
         color: {BLUE};
-        font-weight: 700;
-        font-size: 0.95rem;
     }}
-    .stat-value-red {{
+    .stat-red {{ 
         color: {RED};
-        font-weight: 700;
-        font-size: 0.95rem;
     }}
     
     /* ===== العلامة التجارية ===== */
     .brand-container {{
-        padding: 8px 0 10px 0;
+        padding: 4px 0 8px 0;
     }}
     .brand {{
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 2px 12px 2px;
+        padding: 8px 0 12px 0;
     }}
     .brand-icon {{
-        width: 46px;
-        height: 46px;
-        border-radius: 12px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, {GREEN}22, {BLUE}22);
-        border: 1px solid {GREEN}44;
-        font-size: 1.45rem;
+        font-size: 2.2rem;
+        line-height: 1;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }}
     .brand-title {{
-        font-size: 1.1rem;
+        font-size: 1.4rem;
         font-weight: 800;
-        background: linear-gradient(90deg, {GREEN}, {BLUE});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: {TEXT_COLOR};
+        letter-spacing: -0.5px;
     }}
     .brand-sub {{
         font-size: 0.6rem;
-        color: {LABEL};
-        letter-spacing: 1.4px;
+        color: {LABEL_COLOR};
+        letter-spacing: 1.5px;
         text-transform: uppercase;
         margin-top: 2px;
+        font-weight: 600;
     }}
     
     /* ===== التسميات ===== */
     .section-label {{
-        font-size: 0.58rem;
-        color: {LABEL};
+        font-size: 0.6rem;
+        color: {LABEL_COLOR};
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin: 10px 0 7px 0;
+        margin: 1.2rem 0 0.6rem 0;
     }}
     
     /* ===== الفاصل ===== */
     .divider {{
         height: 1px;
         background: {DIVIDER};
-        margin: 8px 0;
+        margin: 0.6rem 0;
     }}
     
     /* ===== التذييل ===== */
     .footer {{
         text-align: center;
-        margin-top: 15px;
-        padding-top: 12px;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
         border-top: 1px solid {DIVIDER};
     }}
     .footer-title {{
-        font-size: 0.68rem;
-        color: {LABEL};
+        font-size: 0.75rem;
+        color: {TEXT_COLOR};
         font-weight: 600;
-        margin-bottom: 3px;
+        margin-bottom: 4px;
     }}
     .footer-sub {{
-        font-size: 0.62rem;
-        color: {LABEL};
-        opacity: 0.7;
+        font-size: 0.6rem;
+        color: {LABEL_COLOR};
+        margin-bottom: 6px;
     }}
     .footer-links {{
-        margin-top: 7px;
-        font-size: 0.66rem;
+        margin-top: 6px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
     }}
     .footer-links a {{
         color: {GREEN};
         text-decoration: none;
+        font-size: 0.7rem;
         font-weight: 600;
+        transition: all 0.2s ease;
     }}
     .footer-links a:hover {{
         text-decoration: underline;
-    }}
-    .footer-links span {{
-        color: {DIVIDER};
-        margin: 0 5px;
+        opacity: 0.8;
     }}
     </style>
     """, unsafe_allow_html=True)
@@ -330,7 +333,6 @@ def render_sidebar():
         # ── 2) العلامة التجارية (Brand) ──
         st.markdown(f"""
         <div class="brand-container">
-            <div class="divider"></div>
             <div class="brand">
                 <div class="brand-icon">🎯</div>
                 <div>
@@ -338,7 +340,7 @@ def render_sidebar():
                     <div class="brand-sub">{t["brand_sub"]}</div>
                 </div>
             </div>
-            <div class="divider" style="margin-bottom:10px;"></div>
+            <div class="divider"></div>
             <div class="section-label">{t["nav_label"]}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -357,38 +359,42 @@ def render_sidebar():
             
             if st.button(item["label"], key=f"nav_{key}", use_container_width=True):
                 st.session_state["active_page"] = key
-                st.switch_page(item["target"])
+                try:
+                    st.switch_page(item["target"])
+                except Exception as e:
+                    st.error(f"خطأ في التنقل إلى {item['target']}: {e}")
             
             if is_active:
                 st.markdown('</div>', unsafe_allow_html=True)
 
-        # ── 4) الإحصائيات والتذييل ──
+        # ── 4) الإحصائيات ──
         st.markdown(f"""
-        <div style="margin-top:12px;">
-            <div class="divider" style="margin-bottom:10px;"></div>
-            <div class="section-label" style="margin-top:0;">{t["stats_label"]}</div>
+        <div style="margin-top: 0.5rem;">
+            <div class="section-label" style="margin-top: 0;">{t["stats_label"]}</div>
             
             <div class="stat-card">
                 <span class="stat-label">{t["stat_analyses"]}</span>
-                <span class="stat-value-green">{analyses}</span>
+                <span class="stat-value stat-green">{analyses}</span>
             </div>
             <div class="stat-card">
                 <span class="stat-label">{t["stat_actions"]}</span>
-                <span class="stat-value-blue">{actions}</span>
+                <span class="stat-value stat-blue">{actions}</span>
             </div>
-            <div class="stat-card" style="margin-bottom:0;">
+            <div class="stat-card" style="margin-bottom: 0;">
                 <span class="stat-label">{t["stat_alerts"]}</span>
-                <span class="stat-value-red">{alerts}</span>
+                <span class="stat-value stat-red">{alerts}</span>
             </div>
-            
-            <div class="footer">
-                <div class="footer-title">🎯 ActionLens · 2026</div>
-                <div class="footer-sub">{t["footer_sub"]}</div>
-                <div class="footer-links">
-                    <a href="https://github.com" target="_blank">GitHub</a>
-                    <span>·</span>
-                    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
-                </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── 5) التذييل ──
+        st.markdown(f"""
+        <div class="footer">
+            <div class="footer-title">🎯 ActionLens · 2026</div>
+            <div class="footer-sub">{t["footer_sub"]}</div>
+            <div class="footer-links">
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <a href="https://linkedin.com" target="_blank">LinkedIn</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
