@@ -16,10 +16,7 @@ LABELS_PATH = Path("models/labels.txt")
 
 
 def load_model():
-    """
-    بتحمل الـ TFLite model
-    """
-    interpreter = tf.lite.Interpreter(model_path=str(MODEL_PATH))
+    interpreter = Interpreter(model_path=str(MODEL_PATH))
     interpreter.allocate_tensors()
     return interpreter
 
