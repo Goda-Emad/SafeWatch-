@@ -30,10 +30,11 @@ load_css()
 with st.sidebar:
     # Logo
     logo_path = Path("app/assets/logo.png")
-    if logo_path.exists():
+if logo_path.exists():
+    try:
         st.image(str(logo_path), width=150)
-
-    st.title("🛡️ SafeWatch")
+    except Exception:
+        st.title("🛡️ SafeWatch")
     st.caption("نظام كشف السلوك المشبوه")
     st.divider()
 
