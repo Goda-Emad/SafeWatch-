@@ -9,24 +9,21 @@ from email.mime.image import MIMEImage
 from datetime import datetime
 from pathlib import Path
 
+ROOT = Path(__file__).parent.parent
 
 # ═══════════════════════════════════════
 # Gmail Config
 # ═══════════════════════════════════════
 def get_credentials():
-    """
-    بتجيب الـ credentials من Streamlit Secrets أو .env
-    """
     try:
         import streamlit as st
-        sender = st.secrets["GMAIL_USER"]
+        sender   = st.secrets["GMAIL_USER"]
         password = st.secrets["GMAIL_APP_PASSWORD"]
         receiver = st.secrets["RECEIVER_EMAIL"]
     except Exception:
-        sender = os.getenv("GMAIL_USER")
+        sender   = os.getenv("GMAIL_USER")
         password = os.getenv("GMAIL_APP_PASSWORD")
         receiver = os.getenv("RECEIVER_EMAIL")
-
     return sender, password, receiver
 
 
@@ -34,19 +31,16 @@ def get_credentials():
 # تحميل قالب الإيميل
 # ═══════════════════════════════════════
 def load_template(label: str, confidence: float, timestamp: str) -> tuple:
-    """
-    بتحمل HTML و TXT template وتملأهم بالبيانات
-    """
-    html_path = Path("alerts/email_templates/alert_template.html")
-    txt_path  = Path("alerts/email_templates/alert_template.txt")
+    html_path = ROOT / "alerts" / "email_templates" / "alert_template.html"
+    txt_path  = ROOT / "alerts" / "email_templates" / "alert_template.txt"
 
     placeholders = {
-        "{LABEL}":      label.upper(),
-        "{CONFIDENCE}": f"{confidence:.2%}",
-        "{TIMESTAMP}":  timestamp,
+        "{LABEL}":          label.upper(),
+        "{CONFIDENCE}":     f"{confidence:.2%}",
+        "{CONFIDENCE_PCT}": str(int(confidence * 100)),
+        "{TIMESTAMP}":      timestamp,
     }
 
-    # HTML
     if html_path.exists():
         html = html_path.read_text(encoding="utf-8")
         for k, v in placeholders.items():
@@ -59,7 +53,6 @@ def load_template(label: str, confidence: float, timestamp: str) -> tuple:
         <p><b>الوقت:</b> {timestamp}</p>
         """
 
-    # TXT
     if txt_path.exists():
         txt = txt_path.read_text(encoding="utf-8")
         for k, v in placeholders.items():
@@ -83,13 +76,6 @@ def send_alert_email(
     confidence: float,
     image_path: str = None
 ) -> bool:
-    """
-    بتبعت إيميل تنبيه على Gmail
-    
-    Returns:
-        True  ← لو الإيميل اتبعت
-        False ← لو فيه error
-    """
     try:
         sender, password, receiver = get_credentials()
 
@@ -100,26 +86,28 @@ def send_alert_email(
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         html_body, txt_body = load_template(label, confidence, timestamp)
 
-        # ── بناء الإيميل ──
-        msg = MIMEMultipart("alternative")
+        # ── بناء الإيميل — mixed يحتوي alternative + attachment ──
+        msg = MIMEMultipart("mixed")
         msg["Subject"] = f"🚨 SafeWatch Alert — {label.upper()} Detected"
         msg["From"]    = sender
         msg["To"]      = receiver
 
-        # النص العادي أولاً، HTML تاني
-        msg.attach(MIMEText(txt_body, "plain", "utf-8"))
-        msg.attach(MIMEText(html_body, "html",  "utf-8"))
+        # alternative جوه mixed عشان HTML يظهر صح
+        alternative = MIMEMultipart("alternative")
+        alternative.attach(MIMEText(txt_body,  "plain", "utf-8"))
+        alternative.attach(MIMEText(html_body, "html",  "utf-8"))
+        msg.attach(alternative)
 
-        # إرفاق الصورة لو موجودة
+        # إرفاق الصورة
         if image_path and Path(image_path).exists():
             with open(image_path, "rb") as img_file:
-                image = MIMEImage(img_file.read())
-                image.add_header(
+                image_attachment = MIMEImage(img_file.read())
+                image_attachment.add_header(
                     "Content-Disposition",
                     "attachment",
                     filename=Path(image_path).name
                 )
-                msg.attach(image)
+                msg.attach(image_attachment)
 
         # ── إرسال ──
         context = ssl.create_default_context()
