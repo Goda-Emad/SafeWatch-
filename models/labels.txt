@@ -1,1 +1,8 @@
-
+0 Fighting
+1 Running
+2 Sleeping
+3 Hugging
+4 Dancing
+5 Texting
+6 Eating
+7 Cycling
