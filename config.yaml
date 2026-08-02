@@ -1,1 +1,52 @@
+# SafeWatch - config.yaml
 
+# ═══════════════════════════════════════
+# Model Config
+# ═══════════════════════════════════════
+model:
+  path: "models/model_unquant.tflite"
+  labels_path: "models/labels.txt"
+  input_size: 224
+
+# ═══════════════════════════════════════
+# Alert Config
+# ═══════════════════════════════════════
+alert:
+  suspicious_classes:
+    - "fighting"
+  threshold: 0.75
+  cooldown_seconds: 30
+
+# ═══════════════════════════════════════
+# Camera Config
+# ═══════════════════════════════════════
+camera:
+  source: 0
+  predict_every_n_frames: 10
+  fps: 30
+
+# ═══════════════════════════════════════
+# Email Config
+# ═══════════════════════════════════════
+email:
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 465
+  enabled: true
+
+# ═══════════════════════════════════════
+# Paths
+# ═══════════════════════════════════════
+paths:
+  screenshots: "alerts/screenshots"
+  alerts_log: "alerts/alerts_log.csv"
+  email_templates: "alerts/email_templates"
+  assets: "app/assets"
+
+# ═══════════════════════════════════════
+# App Config
+# ═══════════════════════════════════════
+app:
+  title: "SafeWatch"
+  version: "1.0"
+  language: "ar"
+  theme: "dark"
