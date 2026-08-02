@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 1px;
+    }
+    .header p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      opacity: 0.85;
+    }
+    .badge {
+      display: inline-block;
+      background: #fff;
+      color: #c0392b;
+      font-weight: bold;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .body {
+      padding: 30px;
+    }
+    .info-box {
+      background: #fff5f5;
+      border-right: 5px solid #e74c3c;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0e0e0;
+      font-size: 15px;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #888;
+      font-weight: 600;
+    }
+    .info-value {
+      color: #222;
+      font-weight: bold;
+    }
+    .confidence-bar-bg {
+      background: #f0e0e0;
+      border-radius: 10px;
+      height: 12px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .confidence-bar {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      height: 12px;
+      border-radius: 10px;
+      width: {CONFIDENCE_PCT}%;
+    }
+    .image-section {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .image-section p {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .footer {
+      background: #f9f9f9;
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #aaa;
+      border-top: 1px solid #eee;
+    }
+    .footer span {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
 
+    <!-- Header -->
+    <div class="header">
+      <h1>🛡️ SafeWatch</h1>
+      <p>نظام كشف السلوك المشبوه</p>
+      <div class="badge">🚨 تنبيه أمني</div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">🔍 السلوك المكتشف</span>
+          <span class="info-value">{LABEL}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📊 نسبة الثقة</span>
+          <span class="info-value">{CONFIDENCE}</span>
+        </div>
+        <div class="confidence-bar-bg">
+          <div class="confidence-bar"></div>
+        </div>
+        <div class="info-row" style="margin-top:12px;">
+          <span class="info-label">🕐 وقت الحادثة</span>
+          <span class="info-value">{TIMESTAMP}</span>
+        </div>
+      </div>
+
+      <div class="image-section">
+        <p>📷 صورة الحادثة مرفقة بهذا الإيميل</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      تم الإرسال تلقائياً بواسطة <span>SafeWatch v1.0</span><br/>
+      نظام المراقبة الذكي — 2026
+    </div>
+
+  </div>
+</body>
+</html>
