@@ -1,8 +1,10 @@
 # SafeWatch - app/app.py
 import streamlit as st
+import sys
 from pathlib import Path
 
 BASE = Path(__file__).parent
+sys.path.append(str(BASE))
 
 # ═══════════════════════════════════════
 # Page Config
@@ -28,38 +30,8 @@ load_css()
 # ═══════════════════════════════════════
 # Sidebar
 # ═══════════════════════════════════════
-with st.sidebar:
-    st.markdown("""
-        <div style='text-align:center; padding: 10px 0 4px;'>
-            <span style='font-size:2.8rem;'>🛡️</span>
-            <h2 style='color:#f0a500; margin:4px 0 0;'>SafeWatch</h2>
-            <p style='color:#8a9bb5; font-size:0.8rem; margin:0;'>
-                نظام كشف السلوك المشبوه
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.divider()
-
-    st.markdown("### 📌 الصفحات")
-    st.page_link("app.py",              label="🏠 الرئيسية")
-    st.page_link("pages/image_test.py", label="🖼️ اختبار صورة")
-    st.page_link("pages/live_camera.py",label="📹 كاميرا مباشرة")
-
-    st.divider()
-
-    st.markdown("### ⚙️ الإعدادات")
-    threshold = st.slider(
-        "حد التنبيه (Threshold)",
-        min_value=0.5,
-        max_value=1.0,
-        value=0.75,
-        step=0.05
-    )
-    st.session_state["threshold"] = threshold
-
-    st.divider()
-    st.caption("SafeWatch v1.0 — 2026")
+from components.sidebar import render_sidebar
+render_sidebar()
 
 # ═══════════════════════════════════════
 # Hero Section
@@ -73,17 +45,12 @@ st.markdown("""
         border-left: 5px solid #f0a500;
         box-shadow: 0 4px 24px rgba(26,39,68,0.13);
     '>
-        <h1 style='
-            color: #f0a500;
-            font-size: 2.4rem;
-            margin: 0 0 8px;
-            border: none;
-        '>🛡️ SafeWatch</h1>
-        <p style='
-            color: #c8d4e8;
-            font-size: 1.1rem;
-            margin: 0;
-        '>نظام كشف السلوك المشبوه في الوقت الفعلي</p>
+        <h1 style='color:#f0a500; font-size:2.4rem; margin:0 0 8px; border:none;'>
+            🛡️ SafeWatch
+        </h1>
+        <p style='color:#c8d4e8; font-size:1.1rem; margin:0;'>
+            نظام كشف السلوك المشبوه في الوقت الفعلي
+        </p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -129,7 +96,6 @@ with col_a:
             border: 1px solid #dce3ed;
             border-top: 4px solid #f0a500;
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            height: 100%;
         '>
             <h3 style='color:#1a2744; margin-top:0;'>🖼️ اختبار صورة</h3>
             <p style='color:#5a6a85;'>ارفع صورة وحلل السلوك فيها فوراً.</p>
@@ -140,7 +106,8 @@ with col_a:
             </ul>
         </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/image_test.py", label="ابدأ الاختبار ←")
+    if st.button("🖼️ ابدأ الاختبار ←", key="btn_image", use_container_width=True):
+        st.switch_page("pages/image_test.py")
 
 with col_b:
     st.markdown("""
@@ -151,7 +118,6 @@ with col_b:
             border: 1px solid #dce3ed;
             border-top: 4px solid #1a2744;
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            height: 100%;
         '>
             <h3 style='color:#1a2744; margin-top:0;'>📹 كاميرا مباشرة</h3>
             <p style='color:#5a6a85;'>راقب عبر الكاميرا في الوقت الفعلي.</p>
@@ -162,4 +128,5 @@ with col_b:
             </ul>
         </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/live_camera.py", label="شغّل الكاميرا ←")
+    if st.button("📹 شغّل الكاميرا ←", key="btn_camera", use_container_width=True):
+        st.switch_page("pages/live_camera.py")
